@@ -9,14 +9,15 @@ const SubnetCalculator = () => {
     try {
       const [network, prefix] = ip.split('/');
       const subnetMask = parseInt(subnet) || parseInt(prefix);
+
       if (!validateIP(network) || subnetMask < 0 || subnetMask > 32) {
         throw new Error('Invalid IP or subnet mask');
       }
 
       const networkAddress = calculateNetworkAddress(network, subnetMask);
       const broadcastAddress = calculateBroadcastAddress(networkAddress, subnetMask);
-      const firstIp = calculateFirstUsableIp(networkAddress);
-      const lastIp = calculateLastUsableIp(broadcastAddress);
+      const firstIp = calculateFirstUsableIp(networkAddress, subnetMask);
+      const lastIp = calculateLastUsableIp(broadcastAddress, subnetMask);
 
       setResults({ networkAddress, broadcastAddress, firstIp, lastIp });
     } catch (err) {
@@ -25,28 +26,70 @@ const SubnetCalculator = () => {
   };
 
   const validateIP = (ip) => {
-    return /^(\d{1,3}\.){3}\d{1,3}$/.test(ip);
+    const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/; // Basic IPv4 regex validation
+    if (!ipRegex.test(ip)) return false;
+
+    const octets = ip.split('.').map(Number);
+    return octets.every((octet) => octet >= 0 && octet <= 255);
   };
 
   const calculateNetworkAddress = (ip, mask) => {
-    // Implement logic to calculate network address
-    return ip; // Placeholder
+    const ipBinary = ipToBinary(ip);
+    const maskBinary = getSubnetMaskBinary(mask);
+    const networkBinary = ipBinary.map((bit, i) => bit & maskBinary[i]);
+    return binaryToIp(networkBinary);
   };
 
   const calculateBroadcastAddress = (network, mask) => {
-    // Implement logic to calculate broadcast address
-    return network; // Placeholder
+    const maskBinary = getSubnetMaskBinary(mask).map((bit) => (bit === 1 ? 0 : 1));
+    const networkBinary = ipToBinary(network);
+    const broadcastBinary = networkBinary.map((bit, i) => bit | maskBinary[i]);
+    return binaryToIp(broadcastBinary);
   };
 
-  const calculateFirstUsableIp = (network) => {
-    // Implement logic for first usable IP
-    return network; // Placeholder
+  const calculateFirstUsableIp = (network, mask) => {
+    if (mask === 32) return network; // For /32, only one usable IP
+    if (mask === 31) return network; // For /31, both IPs are usable
+    const ipBinary = ipToBinary(network);
+    const ipDecimal = binaryToDecimal(ipBinary);
+    return decimalToIp(ipDecimal + 1);
   };
 
-  const calculateLastUsableIp = (broadcast) => {
-    // Implement logic for last usable IP
-    return broadcast; // Placeholder
+  const calculateLastUsableIp = (broadcast, mask) => {
+    if (mask === 32) return broadcast; // For /32, only one usable IP
+    if (mask === 31) return broadcast; // For /31, both IPs are usable
+    const ipBinary = ipToBinary(broadcast);
+    const ipDecimal = binaryToDecimal(ipBinary);
+    return decimalToIp(ipDecimal - 1);
   };
+
+  const ipToBinary = (ip) =>
+    ip
+      .split('.')
+      .map((octet) => Number(octet).toString(2).padStart(8, '0'))
+      .join('')
+      .split('')
+      .map(Number);
+
+  const binaryToIp = (binary) =>
+    binary
+      .join('')
+      .match(/.{8}/g)
+      .map((octet) => parseInt(octet, 2))
+      .join('.');
+
+  const binaryToDecimal = (binary) => parseInt(binary.join(''), 2);
+
+  const decimalToIp = (decimal) => {
+    const octets = [];
+    for (let i = 0; i < 4; i++) {
+      octets.unshift(decimal & 255);
+      decimal >>= 8;
+    }
+    return octets.join('.');
+  };
+
+  const getSubnetMaskBinary = (mask) => Array(32).fill(0).fill(1, 0, mask);
 
   return (
     <div>
