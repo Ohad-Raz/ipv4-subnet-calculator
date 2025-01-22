@@ -40,8 +40,9 @@ const SubnetCalculator = () => {
       const broadcastAddress = calculateBroadcastAddress(networkAddress, subnetMask);
       const firstIp = calculateFirstUsableIp(networkAddress, subnetMask);
       const lastIp = calculateLastUsableIp(broadcastAddress, subnetMask);
+      const decimalSubnetMask = prefixToDecimal(subnetMask);
 
-      setResults({ networkAddress, broadcastAddress, firstIp, lastIp, subnetMask });
+      setResults({ networkAddress, broadcastAddress, firstIp, lastIp, subnetMask, decimalSubnetMask });
     } catch (err) {
       setResults({}); // Clear any previous results
       alert(err.message);
@@ -126,6 +127,17 @@ const SubnetCalculator = () => {
 
   const getSubnetMaskBinary = (mask) => Array(32).fill(0).fill(1, 0, mask);
 
+  const prefixToDecimal = (prefix) => {
+    const maskBinary = Array(32)
+      .fill(0)
+      .fill(1, 0, prefix) // Fill '1's for the network bits
+      .join('');
+    return maskBinary
+      .match(/.{8}/g) // Split into 8-bit octets
+      .map((octet) => parseInt(octet, 2)) // Convert binary octets to decimal
+      .join('.'); // Join into the standard decimal format
+  };
+
   return (
     <div>
       <h3>Subnet Calculator</h3>
@@ -169,7 +181,7 @@ const SubnetCalculator = () => {
           <p>Broadcast Address: {results.broadcastAddress}</p>
           <p>First Usable IP: {results.firstIp}</p>
           <p>Last Usable IP: {results.lastIp}</p>
-          <p>Subnet Mask: /{results.subnetMask}</p>
+          <p>Subnet Mask: {results.decimalSubnetMask} /{results.subnetMask}</p>
         </div>
       )}
     </div>
