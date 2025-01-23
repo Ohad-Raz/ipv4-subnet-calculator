@@ -1,7 +1,6 @@
 import React from 'react';
 import './App.css';
-import SubnetCalculator from './Components/SubnetCalculator/Subnet_Calculator';
-import BinaryConverter from './Components/BinaryConverter/Binary_Converter';
+import Calculator_Page from './Pages/Calculator_Page';
 
 function App() {
   return (
@@ -10,8 +9,7 @@ function App() {
         <h1>IPv4 Subnet Calculator</h1>
       </header>
       <main>
-        <BinaryConverter />
-        <SubnetCalculator />
+             <Calculator_Page/>
       </main>
     </div>
   );
