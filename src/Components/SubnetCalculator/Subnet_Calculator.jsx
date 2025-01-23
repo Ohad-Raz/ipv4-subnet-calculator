@@ -11,6 +11,8 @@ import {
 import Input_Field from './Input_Field';
 import Error_Message from './Error_Message';
 
+const MAX_DEVICES = 4294967296;
+
 const Subnet_Calculator = () => {
   const [ip, setIp] = useState('');
   const [subnet, setSubnet] = useState('');
@@ -36,6 +38,13 @@ const Subnet_Calculator = () => {
     setErrors({ ...errors, subnet: '' });
   };
 
+  const handleDevicesInput = (value) => {
+    const sanitizedValue = value.replace(/[^0-9]/g, ''); // Only allow numbers
+    const validatedValue = Math.min(MAX_DEVICES, Math.max(1, parseInt(sanitizedValue, 10) || 1));
+    setDevices(validatedValue);
+    setErrors({ ...errors, devices: '' });
+  };
+
   const validateInputs = () => {
     let isValid = true;
     const newErrors = {};
@@ -50,7 +59,7 @@ const Subnet_Calculator = () => {
       isValid = false;
     }
 
-    if (useDevices && (devices === '' || isNaN(devices) || devices <= 0 || devices > 4294967296)) {
+    if (useDevices && (devices === '' || isNaN(devices) || devices <= 0 || devices > MAX_DEVICES)) {
       newErrors.devices = 'Invalid number of devices. Must be between 1 and 4,294,967,296.';
       isValid = false;
     }
@@ -98,14 +107,15 @@ const Subnet_Calculator = () => {
         Use Number of Devices
       </label>
       {useDevices ? (
-        <Input_Field
-          label="Number of Devices"
-          value={devices}
-          onChange={setDevices}
-          type="number"
-          placeholder="e.g., 50"
-          error={errors.devices}
-        />
+       <Input_Field
+       label="Number of Devices"
+       value={devices}
+       onChange={handleDevicesInput}
+       type="text" // Keep as text to allow sanitization, but restrict programmatically
+       placeholder="e.g., 50"
+       error={errors.devices}
+     />
+     
       ) : (
         <Input_Field
           label="Subnet Mask"
