@@ -3,95 +3,66 @@ import React, { useState } from 'react';
 const BinaryConverter = () => {
   const [binary, setBinary] = useState('');
   const [decimal, setDecimal] = useState('');
-  const [error, setError] = useState('');
 
+  // Handle Binary Input (prevents leading dots and multiple consecutive dots)
   const handleBinaryChange = (value) => {
-    // Prevent consecutive dots
-    if (value.includes('..')) return;
-
-    // Allow only binary digits (0,1) and dots
-    if (!/^[01.]*$/.test(value)) {
-      setError('Invalid input: Only 0s and 1s are allowed.');
-      return;
-    }
+    if (!/^[01.]*$/.test(value)) return; // Allow only 0,1, and dots
+    if (value.includes('..')) return; // Prevent multiple dots in a row
+    if (value.startsWith('.')) return; // Prevent dot at the beginning
 
     const binaryOctets = value.split('.');
-    if (binaryOctets.length > 4) {
-      setError('Invalid input: Maximum 4 octets allowed.');
-      return;
-    }
+    if (binaryOctets.length > 4) return; // Maximum 4 octets allowed
+    if (binaryOctets.some(octet => octet.length > 8)) return; // Max 8 bits per octet
 
-    if (binaryOctets.some(octet => octet.length > 8)) {
-      setError('Invalid input: Each octet must have at most 8 bits.');
-      return;
-    }
-
-    setError('');
     setBinary(value);
   };
 
+  // Handle Decimal Input (prevents leading dots and multiple consecutive dots)
   const handleDecimalChange = (value) => {
-    // Prevent consecutive dots
-    if (value.includes('..')) return;
-
-    // Allow only numbers and dots
-    if (!/^[0-9.]*$/.test(value)) {
-      setError('Invalid input: Only numbers allowed.');
-      return;
-    }
+    if (!/^[0-9.]*$/.test(value)) return; // Allow only numbers and dots
+    if (value.includes('..')) return; // Prevent multiple dots in a row
+    if (value.startsWith('.')) return; // Prevent dot at the beginning
 
     const decimalOctets = value.split('.');
-    if (decimalOctets.length > 4) {
-      setError('Invalid input: Maximum 4 octets allowed.');
-      return;
-    }
+    if (decimalOctets.length > 4) return; // Maximum 4 octets allowed
 
     const clampedOctets = decimalOctets.map(octet => {
       const num = parseInt(octet, 10);
-      if (isNaN(num)) return '';
-      return Math.min(Math.max(num, 0), 255);
+      if (isNaN(num)) return ''; // Allow empty octets while typing
+      return Math.min(Math.max(num, 0), 255); // Restrict 0-255
     });
 
-    setError('');
     setDecimal(clampedOctets.join('.'));
   };
 
+  // Convert Binary to Decimal (auto-completes missing octets)
   const convertBinaryToDecimal = () => {
-    const binaryOctets = binary.split('.');
-    
-    // Ensure we have exactly 4 octets, pad if necessary
+    let binaryOctets = binary.split('.').filter(octet => octet !== '');
+
     while (binaryOctets.length < 4) {
-      binaryOctets.push('00000000');
+      binaryOctets.push('00000000'); // Auto-fill missing octets
     }
 
-    if (binaryOctets.every(octet => /^[01]{1,8}$/.test(octet))) {
-      const decimalOctets = binaryOctets.map(octet => parseInt(octet, 2).toString());
-      setDecimal(decimalOctets.join('.'));
-    } else {
-      setError('Invalid action. Provide 1-4 valid binary octets.');
-    }
+    const decimalOctets = binaryOctets.map(octet =>
+      parseInt(octet, 2).toString()
+    );
+
+    setDecimal(decimalOctets.join('.'));
   };
 
+  // Convert Decimal to Binary (auto-completes missing octets)
   const convertDecimalToBinary = () => {
-    const decimalOctets = decimal.split('.');
+    let decimalOctets = decimal.split('.').filter(octet => octet !== '');
 
-    // Ensure we have exactly 4 octets, pad with zeros
     while (decimalOctets.length < 4) {
-      decimalOctets.push('0');
+      decimalOctets.push('0'); // Auto-fill missing octets
     }
 
-    if (
-      decimalOctets.every(
-        octet => /^\d{1,3}$/.test(octet) && parseInt(octet) >= 0 && parseInt(octet) <= 255
-      )
-    ) {
-      const binaryOctets = decimalOctets.map(octet =>
-        parseInt(octet, 10).toString(2).padStart(8, '0')
-      );
-      setBinary(binaryOctets.join('.'));
-    } else {
-      setError('Invalid action. Provide exactly 4 decimal octets.');
-    }
+    const binaryOctets = decimalOctets.map(octet =>
+      parseInt(octet, 10).toString(2).padStart(8, '0')
+    );
+
+    setBinary(binaryOctets.join('.'));
   };
 
   return (
@@ -115,7 +86,6 @@ const BinaryConverter = () => {
         />
         <button onClick={convertDecimalToBinary}>Convert to Binary</button>
       </div>
-      {error && <p className="error">{error}</p>}
       <p>Binary: {binary}</p>
       <p>Decimal: {decimal}</p>
     </div>
