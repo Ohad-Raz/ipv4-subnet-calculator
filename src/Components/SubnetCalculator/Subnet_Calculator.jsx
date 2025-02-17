@@ -29,15 +29,63 @@ const Subnet_Calculator = () => {
   };
 
   const handleIPChange = (value) => {
-    const octets = value.split('.').map((octet) => Math.min(255, Math.max(0, parseInt(octet, 10) || 0)));
-    setIp(octets.join('.'));
-    setErrors({ ...errors, ip: '' });
-  };
+    let cleanedValue = value.replace(/[^0-9.]/g, ''); // Remove invalid characters
+    cleanedValue = cleanedValue.replace(/\.{2,}/g, '.'); // Prevent multiple consecutive dots
 
-  const handleSubnetChange = (value) => {
-    setSubnet(Math.min(32, Math.max(0, parseInt(value, 10) || 0)));
-    setErrors({ ...errors, subnet: '' });
-  };
+    const octets = cleanedValue.split('.');
+
+    if (octets.length > 4) {
+        setErrors({ ...errors, ip: 'Invalid action: Only 4 octets allowed.' });
+        return;
+    }
+
+    let invalidAction = false; // Flag to track if an error occurred
+
+    const processedOctets = octets.map((octet) => {
+        if (octet === '') return ''; // Allow the user to type
+
+        let num = parseInt(octet, 10);
+        if (isNaN(num)) return '';
+
+        if (num > 255) {
+            invalidAction = true;
+            return '255'; // Auto-correct to 255
+        }
+
+        return String(num); // Convert back to string (removes leading zeros)
+    });
+
+    if (invalidAction) {
+        setErrors({ ...errors, ip: 'Invalid action: Octets must be between 0 and 255.' });
+    } else {
+        setErrors({ ...errors, ip: '' });
+    }
+
+    setIp(processedOctets.join('.'));
+};
+
+
+const handleSubnetChange = (value) => {
+  // Remove all non-numeric characters except single leading zero
+  let cleanedValue = value.replace(/[^0-9]/g, '');
+  
+  // Prevent multiple leading zeros
+  cleanedValue = cleanedValue.replace(/^0+(?=\d)/, '');
+
+  // Convert to integer and clamp between 0-32
+  let num = parseInt(cleanedValue, 10);
+  if (isNaN(num)) num = ''; // Allow empty value during typing
+
+  if (num > 32) {
+      setErrors({ ...errors, subnet: 'Invalid action: Subnet Mask must be between 0 and 32.' });
+      num = 32; // Auto-correct to 32
+  } else {
+      setErrors({ ...errors, subnet: '' });
+  }
+
+  setSubnet(num.toString());
+};
+
 
   const handleDevicesChange = (value) => {
     const sanitizedValue = Math.min(Math.max(parseInt(value, 10) || 1, 1), 4294967296);
