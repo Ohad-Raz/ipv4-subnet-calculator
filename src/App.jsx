@@ -1,5 +1,7 @@
 import React from 'react';
-import './App.css';
+// import './App.css';
+import './Styles/styles.css';
+
 import Calculator_Page from './Pages/Calculator_Page';
 
 function App() {
