@@ -87,3 +87,12 @@ const decimalToIp = (decimal) => {
 };
 
 const getSubnetMaskBinary = (mask) => Array(32).fill(0).fill(1, 0, mask);
+
+export const getClassDefaultIP = (ipClass) => {
+  switch (ipClass) {
+    case 'A': return '10.0.0.0';
+    case 'B': return '172.16.0.0';
+    case 'C': return '192.168.0.0';
+    default: return '0.0.0.0';
+  }
+};

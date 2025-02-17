@@ -7,41 +7,41 @@ import {
   calculateRequiredSubnetMask,
   prefixToDecimal,
   validateIP,
+  getClassDefaultIP
 } from './Subnet_Logic';
-import Input_Field from './Input_Field';
-import Error_Message from './Error_Message';
-
-const MAX_DEVICES = 4294967296;
 
 const Subnet_Calculator = () => {
+  const [mode, setMode] = useState('subnet'); // 'subnet' or 'devices'
   const [ip, setIp] = useState('');
   const [subnet, setSubnet] = useState('');
   const [devices, setDevices] = useState('');
-  const [useDevices, setUseDevices] = useState(false);
+  const [ipClass, setIpClass] = useState('A');
   const [results, setResults] = useState({});
-  const [errors, setErrors] = useState({ ip: '', subnet: '', devices: '' });
+  const [errors, setErrors] = useState({});
 
-  const handleIPInput = (value) => {
-    const octets = value.split('.').map((octet) => Math.min(255, Math.max(0, parseInt(octet, 10) || 0)));
-    if (octets.length > 4) {
-      setErrors({ ...errors, ip: 'Invalid IP Address format. Provide a valid IPv4 address.' });
-    } else {
-      setIp(octets.join('.'));
-      setErrors({ ...errors, ip: '' });
-    }
+  const handleModeSwitch = (selectedMode) => {
+    setMode(selectedMode);
+    setResults({});
+    setErrors({});
+    setIp('');
+    setSubnet('');
+    setDevices('');
   };
 
-  const handleSubnetInput = (value) => {
-    const sanitizedValue = value.replace(/[^0-9]/g, '');
-    const validatedValue = Math.min(32, Math.max(0, parseInt(sanitizedValue, 10) || 0));
-    setSubnet(validatedValue);
+  const handleIPChange = (value) => {
+    const octets = value.split('.').map((octet) => Math.min(255, Math.max(0, parseInt(octet, 10) || 0)));
+    setIp(octets.join('.'));
+    setErrors({ ...errors, ip: '' });
+  };
+
+  const handleSubnetChange = (value) => {
+    setSubnet(Math.min(32, Math.max(0, parseInt(value, 10) || 0)));
     setErrors({ ...errors, subnet: '' });
   };
 
-  const handleDevicesInput = (value) => {
-    const sanitizedValue = value.replace(/[^0-9]/g, ''); // Only allow numbers
-    const validatedValue = Math.min(MAX_DEVICES, Math.max(1, parseInt(sanitizedValue, 10) || 1));
-    setDevices(validatedValue);
+  const handleDevicesChange = (value) => {
+    const sanitizedValue = Math.min(Math.max(parseInt(value, 10) || 1, 1), 4294967296);
+    setDevices(sanitizedValue);
     setErrors({ ...errors, devices: '' });
   };
 
@@ -49,19 +49,24 @@ const Subnet_Calculator = () => {
     let isValid = true;
     const newErrors = {};
 
-    if (!validateIP(ip)) {
-      newErrors.ip = 'Invalid IP Address format. Provide a valid IPv4 address.';
-      isValid = false;
-    }
-
-    if (!useDevices && (subnet === '' || subnet < 0 || subnet > 32)) {
-      newErrors.subnet = 'Invalid Subnet Mask. Must be between 0 and 32.';
-      isValid = false;
-    }
-
-    if (useDevices && (devices === '' || isNaN(devices) || devices <= 0 || devices > MAX_DEVICES)) {
-      newErrors.devices = 'Invalid number of devices. Must be between 1 and 4,294,967,296.';
-      isValid = false;
+    if (mode === 'subnet') {
+      if (!validateIP(ip)) {
+        newErrors.ip = 'Invalid IP Address format. Provide a valid IPv4 address.';
+        isValid = false;
+      }
+      if (subnet === '' || subnet < 0 || subnet > 32) {
+        newErrors.subnet = 'Invalid Subnet Mask. Must be between 0 and 32.';
+        isValid = false;
+      }
+    } else {
+      if (!['A', 'B', 'C'].includes(ipClass)) {
+        newErrors.ipClass = 'Invalid IP Class selection.';
+        isValid = false;
+      }
+      if (devices === '' || isNaN(devices) || devices <= 0 || devices > 4294967296) {
+        newErrors.devices = 'Invalid number of devices. Must be between 1 and 4,294,967,296.';
+        isValid = false;
+      }
     }
 
     setErrors(newErrors);
@@ -71,8 +76,15 @@ const Subnet_Calculator = () => {
   const calculateSubnet = () => {
     if (!validateInputs()) return;
 
-    let calculatedSubnetMask = useDevices ? calculateRequiredSubnetMask(devices) : subnet;
-    const networkAddress = calculateNetworkAddress(ip, calculatedSubnetMask);
+    let calculatedIP = ip;
+    let calculatedSubnetMask = subnet;
+
+    if (mode === 'devices') {
+      calculatedIP = getClassDefaultIP(ipClass);
+      calculatedSubnetMask = calculateRequiredSubnetMask(devices);
+    }
+
+    const networkAddress = calculateNetworkAddress(calculatedIP, calculatedSubnetMask);
     const broadcastAddress = calculateBroadcastAddress(networkAddress, calculatedSubnetMask);
     const firstIp = calculateFirstUsableIp(networkAddress, calculatedSubnetMask);
     const lastIp = calculateLastUsableIp(broadcastAddress, calculatedSubnetMask);
@@ -91,42 +103,42 @@ const Subnet_Calculator = () => {
   return (
     <div>
       <h3>Subnet Calculator</h3>
-      <Input_Field
-        label="IP Address"
-        value={ip}
-        onChange={handleIPInput}
-        placeholder="e.g., 192.168.0.1"
-        error={errors.ip}
-      />
-      <label>
-        <input
-          type="checkbox"
-          checked={useDevices}
-          onChange={(e) => setUseDevices(e.target.checked)}
-        />
-        Use Number of Devices
-      </label>
-      {useDevices ? (
-       <Input_Field
-       label="Number of Devices"
-       value={devices}
-       onChange={handleDevicesInput}
-       type="text" // Keep as text to allow sanitization, but restrict programmatically
-       placeholder="e.g., 50"
-       error={errors.devices}
-     />
-     
+      <div>
+        <button onClick={() => handleModeSwitch('subnet')} className={mode === 'subnet' ? 'active' : ''}>
+          Subnet Mask
+        </button>
+        <button onClick={() => handleModeSwitch('devices')} className={mode === 'devices' ? 'active' : ''}>
+          Number of Devices
+        </button>
+      </div>
+
+      {mode === 'subnet' ? (
+        <>
+          <label>IP Address:</label>
+          <input type="text" placeholder="e.g., 192.168.0.1" value={ip} onChange={(e) => handleIPChange(e.target.value)} />
+          {errors.ip && <p className="error">{errors.ip}</p>}
+
+          <label>Subnet Mask:</label>
+          <input type="number" placeholder="e.g., 24" value={subnet} onChange={(e) => handleSubnetChange(e.target.value)} />
+          {errors.subnet && <p className="error">{errors.subnet}</p>}
+        </>
       ) : (
-        <Input_Field
-          label="Subnet Mask"
-          value={subnet}
-          onChange={handleSubnetInput}
-          type="text"
-          placeholder="e.g., 24"
-          error={errors.subnet}
-        />
+        <>
+          <label>IP Class:</label>
+          <select value={ipClass} onChange={(e) => setIpClass(e.target.value)}>
+            <option value="A">Class A</option>
+            <option value="B">Class B</option>
+            <option value="C">Class C</option>
+          </select>
+
+          <label>Number of Devices:</label>
+          <input type="number" placeholder="e.g., 50" value={devices} onChange={(e) => handleDevicesChange(e.target.value)} />
+          {errors.devices && <p className="error">{errors.devices}</p>}
+        </>
       )}
+
       <button onClick={calculateSubnet}>Calculate</button>
+
       {results.networkAddress && (
         <div>
           <p>Network Address: {results.networkAddress}</p>
