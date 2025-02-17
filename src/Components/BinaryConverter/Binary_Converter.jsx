@@ -3,66 +3,61 @@ import React, { useState } from 'react';
 const BinaryConverter = () => {
   const [binary, setBinary] = useState('');
   const [decimal, setDecimal] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  // Handle Binary Input (prevents leading dots and multiple consecutive dots)
   const handleBinaryChange = (value) => {
-    if (!/^[01.]*$/.test(value)) return; // Allow only 0,1, and dots
-    if (value.includes('..')) return; // Prevent multiple dots in a row
-    if (value.startsWith('.')) return; // Prevent dot at the beginning
+    if (!/^[01.]*$/.test(value)) return;
+    if (value.includes('..')) return;
+    if (value.startsWith('.')) return;
 
     const binaryOctets = value.split('.');
-    if (binaryOctets.length > 4) return; // Maximum 4 octets allowed
-    if (binaryOctets.some(octet => octet.length > 8)) return; // Max 8 bits per octet
+    if (binaryOctets.length > 4) return;
+    if (binaryOctets.some(octet => octet.length > 8)) return;
 
     setBinary(value);
   };
 
-  // Handle Decimal Input (prevents leading dots and multiple consecutive dots)
   const handleDecimalChange = (value) => {
-    if (!/^[0-9.]*$/.test(value)) return; // Allow only numbers and dots
-    if (value.includes('..')) return; // Prevent multiple dots in a row
-    if (value.startsWith('.')) return; // Prevent dot at the beginning
+    if (!/^[0-9.]*$/.test(value)) return;
+    if (value.includes('..')) return;
+    if (value.startsWith('.')) return;
 
     const decimalOctets = value.split('.');
-    if (decimalOctets.length > 4) return; // Maximum 4 octets allowed
+    if (decimalOctets.length > 4) return;
 
     const clampedOctets = decimalOctets.map(octet => {
       const num = parseInt(octet, 10);
-      if (isNaN(num)) return ''; // Allow empty octets while typing
-      return Math.min(Math.max(num, 0), 255); // Restrict 0-255
+      if (isNaN(num)) return '';
+      return Math.min(Math.max(num, 0), 255);
     });
 
     setDecimal(clampedOctets.join('.'));
   };
 
-  // Convert Binary to Decimal (auto-completes missing octets)
   const convertBinaryToDecimal = () => {
-    let binaryOctets = binary.split('.').filter(octet => octet !== '');
+    setLoading(true);
+    setTimeout(() => {
+      let binaryOctets = binary.split('.').filter(octet => octet !== '');
+      while (binaryOctets.length < 4) binaryOctets.push('00000000');
 
-    while (binaryOctets.length < 4) {
-      binaryOctets.push('00000000'); // Auto-fill missing octets
-    }
-
-    const decimalOctets = binaryOctets.map(octet =>
-      parseInt(octet, 2).toString()
-    );
-
-    setDecimal(decimalOctets.join('.'));
+      const decimalOctets = binaryOctets.map(octet => parseInt(octet, 2).toString());
+      setDecimal(decimalOctets.join('.'));
+      setBinary(''); // Clear input
+      setLoading(false);
+    }, 1000); // 1-second delay
   };
 
-  // Convert Decimal to Binary (auto-completes missing octets)
   const convertDecimalToBinary = () => {
-    let decimalOctets = decimal.split('.').filter(octet => octet !== '');
+    setLoading(true);
+    setTimeout(() => {
+      let decimalOctets = decimal.split('.').filter(octet => octet !== '');
+      while (decimalOctets.length < 4) decimalOctets.push('0');
 
-    while (decimalOctets.length < 4) {
-      decimalOctets.push('0'); // Auto-fill missing octets
-    }
-
-    const binaryOctets = decimalOctets.map(octet =>
-      parseInt(octet, 10).toString(2).padStart(8, '0')
-    );
-
-    setBinary(binaryOctets.join('.'));
+      const binaryOctets = decimalOctets.map(octet => parseInt(octet, 10).toString(2).padStart(8, '0'));
+      setBinary(binaryOctets.join('.'));
+      setDecimal(''); // Clear input
+      setLoading(false);
+    }, 1000); // 1-second delay
   };
 
   return (
@@ -74,8 +69,11 @@ const BinaryConverter = () => {
           placeholder="Binary (e.g., 11000000.10101000.00000001.00000001)"
           value={binary}
           onChange={(e) => handleBinaryChange(e.target.value)}
+          disabled={loading}
         />
-        <button onClick={convertBinaryToDecimal}>Convert to Decimal</button>
+        <button onClick={convertBinaryToDecimal} disabled={loading}>
+          {loading ? 'Converting...' : 'Convert to Decimal'}
+        </button>
       </div>
       <div>
         <input
@@ -83,11 +81,19 @@ const BinaryConverter = () => {
           placeholder="Decimal (e.g., 192.168.1.1)"
           value={decimal}
           onChange={(e) => handleDecimalChange(e.target.value)}
+          disabled={loading}
         />
-        <button onClick={convertDecimalToBinary}>Convert to Binary</button>
+        <button onClick={convertDecimalToBinary} disabled={loading}>
+          {loading ? 'Converting...' : 'Convert to Binary'}
+        </button>
       </div>
-      <p>Binary: {binary}</p>
-      <p>Decimal: {decimal}</p>
+      {loading && <p>Loading...</p>}
+      {!loading && (
+        <>
+          <p>Binary: {binary}</p>
+          <p>Decimal: {decimal}</p>
+        </>
+      )}
     </div>
   );
 };
