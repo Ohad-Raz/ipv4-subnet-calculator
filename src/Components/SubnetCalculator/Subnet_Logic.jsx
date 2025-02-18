@@ -7,19 +7,13 @@ export const validateIP = (ip) => {
 };
 
 export const calculateRequiredSubnetMask = (devices) => {
-  const totalHosts = parseInt(devices); // Do not add 2 for network and broadcast when allowing full range
-  const hostBits = Math.ceil(Math.log2(totalHosts)); // Calculate required host bits
-  const subnetMask = 32 - hostBits;
-
-  if (subnetMask < 0) {
-    return 0; // If devices exceed IPv4 limit, return /0
-  }
-
-  return subnetMask;
+  if (devices < 1) return 32; // /32 for 1 device
+  const totalHosts = parseInt(devices, 10) + 2; // Include network & broadcast
+  const hostBits = Math.ceil(Math.log2(totalHosts)); // Required host bits
+  return 32 - hostBits;
 };
 
 export const calculateNetworkAddress = (ip, mask) => {
-  if (mask === 0) return '0.0.0.0'; // Special case for /0
   const ipBinary = ipToBinary(ip);
   const maskBinary = getSubnetMaskBinary(mask);
   const networkBinary = ipBinary.map((bit, i) => bit & maskBinary[i]);
@@ -27,7 +21,6 @@ export const calculateNetworkAddress = (ip, mask) => {
 };
 
 export const calculateBroadcastAddress = (network, mask) => {
-  if (mask === 0) return '255.255.255.255'; // Special case for /0
   const maskBinary = getSubnetMaskBinary(mask).map((bit) => (bit === 1 ? 0 : 1));
   const networkBinary = ipToBinary(network);
   const broadcastBinary = networkBinary.map((bit, i) => bit | maskBinary[i]);
@@ -35,28 +28,27 @@ export const calculateBroadcastAddress = (network, mask) => {
 };
 
 export const calculateFirstUsableIp = (network, mask) => {
-  if (mask === 0) return '0.0.0.1'; // Special case for /0
+  if (mask === 32) return network;
   const ipBinary = ipToBinary(network);
   const ipDecimal = binaryToDecimal(ipBinary);
   return decimalToIp(ipDecimal + 1);
 };
 
 export const calculateLastUsableIp = (broadcast, mask) => {
-  if (mask === 0) return '255.255.255.254'; // Special case for /0
+  if (mask === 32) return broadcast;
   const ipBinary = ipToBinary(broadcast);
   const ipDecimal = binaryToDecimal(ipBinary);
   return decimalToIp(ipDecimal - 1);
 };
 
 export const prefixToDecimal = (prefix) => {
-  const maskBinary = Array(32)
+  return Array(32)
     .fill(0)
     .fill(1, 0, prefix) // Fill '1's for the network bits
-    .join('');
-  return maskBinary
+    .join('')
     .match(/.{8}/g) // Split into 8-bit octets
     .map((octet) => parseInt(octet, 2)) // Convert binary octets to decimal
-    .join('.'); // Join into the standard decimal format
+    .join('.');
 };
 
 // Helper functions
@@ -78,12 +70,7 @@ const binaryToIp = (binary) =>
 const binaryToDecimal = (binary) => parseInt(binary.join(''), 2);
 
 const decimalToIp = (decimal) => {
-  const octets = [];
-  for (let i = 0; i < 4; i++) {
-    octets.unshift(decimal & 255);
-    decimal >>= 8;
-  }
-  return octets.join('.');
+  return [24, 16, 8, 0].map((shift) => (decimal >> shift) & 255).join('.');
 };
 
 const getSubnetMaskBinary = (mask) => Array(32).fill(0).fill(1, 0, mask);

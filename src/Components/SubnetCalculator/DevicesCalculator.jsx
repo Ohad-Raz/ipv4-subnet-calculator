@@ -21,7 +21,11 @@ const DevicesCalculator = ({ onResultsUpdate }) => {
   };
 
   const handleDevicesChange = (value) => {
-    let numDevices = parseInt(value, 10) || 1;
+    let numDevices = parseInt(value, 10);
+    if (!numDevices) {
+      setDevices("");
+      return;
+    }
     let maxDevices = classLimits[ipClass];
 
     if (numDevices > maxDevices) {
@@ -35,6 +39,11 @@ const DevicesCalculator = ({ onResultsUpdate }) => {
   };
 
   const calculateDevicesSubnet = () => {
+    if (!devices) {
+      setErrors({ devices: "Please enter a valid number of devices." });
+      return;
+    }
+
     const calculatedIP = getClassDefaultIP(ipClass);
     const calculatedSubnetMask = calculateRequiredSubnetMask(devices);
     const networkAddress = calculateNetworkAddress(calculatedIP, calculatedSubnetMask);
@@ -43,22 +52,49 @@ const DevicesCalculator = ({ onResultsUpdate }) => {
     const lastIp = calculateLastUsableIp(broadcastAddress, calculatedSubnetMask);
     const decimalSubnetMask = prefixToDecimal(calculatedSubnetMask);
 
-    onResultsUpdate({ networkAddress, broadcastAddress, firstIp, lastIp, subnetMask: calculatedSubnetMask, decimalSubnetMask });
+    onResultsUpdate({ 
+      networkAddress, 
+      broadcastAddress, 
+      firstIp, 
+      lastIp, 
+      subnetMask: calculatedSubnetMask, 
+      decimalSubnetMask 
+    });
   };
 
   return (
-    <div className="section">
-      <label>IP Class:</label>
-      <select value={ipClass} onChange={(e) => setIpClass(e.target.value)}>
-        <option value="A">Class A</option>
-        <option value="B">Class B</option>
-        <option value="C">Class C</option>
-      </select>
+    <div className="container">
+      <div className="section">
+        <div className="input-group">
+          <label>
+            IP Class:
+            <span className="tooltip"> ⓘ
+              <span className="tooltip-text">
+                <strong>Class A:</strong> Up to 16,777,214 devices<br />
+                <strong>Class B:</strong> Up to 65,534 devices<br />
+                <strong>Class C:</strong> Up to 65,534 devices (if /16)
+              </span>
+            </span>
+          </label>
+          <select value={ipClass} onChange={(e) => setIpClass(e.target.value)}>
+            <option value="A">Class A</option>
+            <option value="B">Class B</option>
+            <option value="C">Class C</option>
+          </select>
+        </div>
 
-      <label>Number of Devices:</label>
-      <input type="number" placeholder="e.g., 50" value={devices} onChange={(e) => handleDevicesChange(e.target.value)} />
-      {errors.devices && <p className="error">{errors.devices}</p>}
-
+        <div className="input-group">
+          <label>Number of Devices:</label>
+          <input 
+            type="number" 
+            placeholder="e.g., 50" 
+            value={devices} 
+            onChange={(e) => handleDevicesChange(e.target.value)} 
+          />
+          {errors.devices && <p className="error">{errors.devices}</p>}
+        </div>
+      </div>
+  
       <button onClick={calculateDevicesSubnet}>Calculate</button>
     </div>
   );

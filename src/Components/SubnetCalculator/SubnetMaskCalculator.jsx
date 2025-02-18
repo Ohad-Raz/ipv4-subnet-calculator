@@ -70,14 +70,20 @@ const SubnetMaskCalculator = ({ onResultsUpdate }) => {
   };
 
   return (
-    <div className="section">
-      <label>IP Address:</label>
-      <input type="text" placeholder="e.g., 192.168.0.1" value={ip} onChange={(e) => handleIPChange(e.target.value)} />
-      {errors.ip && <p className="error">{errors.ip}</p>}
+    <div className="container">
+      <div className="section">
+        <div className="input-group">
+          <label>IP Address:</label>
+          <input type="text" placeholder="e.g., 192.168.0.1" value={ip} onChange={(e) => handleIPChange(e.target.value)} />
+          {errors.ip && <p className="error">{errors.ip}</p>}
+        </div>
 
-      <label>Subnet Mask:</label>
-      <input type="number" placeholder="e.g., 24" value={subnet} onChange={(e) => handleSubnetChange(e.target.value)} />
-      {errors.subnet && <p className="error">{errors.subnet}</p>}
+        <div className="input-group">
+          <label>Subnet Mask:</label>
+          <input type="number" placeholder="e.g., 24" value={subnet} onChange={(e) => handleSubnetChange(e.target.value)} />
+          {errors.subnet && <p className="error">{errors.subnet}</p>}
+        </div>
+      </div>
 
       <button onClick={calculateSubnet}>Calculate</button>
     </div>
