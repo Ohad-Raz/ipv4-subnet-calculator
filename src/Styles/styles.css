@@ -29,6 +29,8 @@ input, select {
   max-width: 225px; /* Prevents stretching */
 }
 
+
+
 .button-container {
   display: flex;
   justify-content: center;
@@ -74,14 +76,36 @@ button:hover {
   background-color: #f9f9f9;
 }
 
+/* Fixes for Subnet Calculator Input Fields */
 .input-group {
   display: flex;
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
-      align-content: space-around;
-      flex-direction: column;
-      align-items: center;
+  flex-direction: column;
+  align-items: center;
+  width: 100%; /* Ensures the input field fits inside the container */
+  margin-bottom: 1rem;
 }
+
+/* Fixes for Subnet Calculator Input Fields */
+.subnet-container input, .subnet-container select {
+  width: 90%; /* Prevents overflowing */
+  max-width: 250px; /* Keeps input size reasonable */
+}
+
+/* Ensure all sections in Subnet Calculator fit well */
+.subnet-container .section {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Prevent inputs from going outside their parent container */
+.subnet-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
 
 .tooltip {
   display: inline-block;
