@@ -22,21 +22,26 @@ const DevicesCalculator = ({ onResultsUpdate }) => {
 
   const handleDevicesChange = (value) => {
     let numDevices = parseInt(value, 10);
-    if (!numDevices) {
-      setDevices("");
+  
+    // Validation: Prevent empty, negative, or zero values
+    if (isNaN(numDevices) || numDevices <= 0) {
+      setErrors({ devices: "Please enter a valid number of devices (greater than 0)." });
+      setDevices(""); // Clear input
       return;
     }
+  
     let maxDevices = classLimits[ipClass];
-
+  
     if (numDevices > maxDevices) {
       numDevices = maxDevices;
       setErrors({ devices: `Exceeded limit for Class ${ipClass}. Max allowed: ${maxDevices} devices.` });
     } else {
       setErrors({});
     }
-
+  
     setDevices(numDevices);
   };
+  
 
   const calculateDevicesSubnet = () => {
     if (!devices) {

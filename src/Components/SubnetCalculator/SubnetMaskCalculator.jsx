@@ -34,23 +34,36 @@ const SubnetMaskCalculator = ({ onResultsUpdate }) => {
   };
 
   const handleSubnetChange = (value) => {
-    let num = parseInt(value.replace(/[^0-9]/g, ""), 10);
-    if (isNaN(num)) num = "";
-
+    // Remove non-numeric characters
+    let cleanedValue = value.replace(/[^0-9]/g, '');
+    let num = parseInt(cleanedValue, 10);
+  
+    if (isNaN(num) || cleanedValue === '') {
+      setErrors({ subnet: "Please enter a valid subnet mask (0 - 32)." });
+      setSubnet(""); // Clear invalid input
+      return;
+    }
+  
     if (num > 32) {
-      setErrors({ subnet: "Invalid action: Subnet Mask must be between 0 and 32." });
+      setErrors({ subnet: "Subnet Mask must be between 0 and 32." });
       num = 32;
     } else {
       setErrors({});
     }
-
+  
     setSubnet(num.toString());
   };
+  
 
   const calculateSubnet = () => {
     if (!validateIP(ip)) {
-      setErrors({ ip: "Invalid IP Address format. Provide a valid IPv4 address." });
-      return;
+        setErrors({ ip: "Invalid IP Address format. Provide a valid IPv4 address." });
+        return;
+    }
+
+    if (!subnet) {  // Stop calculation if subnet is empty
+        setErrors({ subnet: "Please enter a valid subnet mask." });
+        return;
     }
 
     const networkAddress = calculateNetworkAddress(ip, subnet);
@@ -60,14 +73,15 @@ const SubnetMaskCalculator = ({ onResultsUpdate }) => {
     const decimalSubnetMask = prefixToDecimal(subnet);
 
     onResultsUpdate({
-      networkAddress,
-      broadcastAddress,
-      firstIp,
-      lastIp,
-      subnetMask: subnet,
-      decimalSubnetMask,
+        networkAddress,
+        broadcastAddress,
+        firstIp,
+        lastIp,
+        subnetMask: subnet,
+        decimalSubnetMask,
     });
-  };
+};
+
 
   return (
     <div className="container">
