@@ -4,16 +4,17 @@
 /* Global Styles */
 body {
   font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #191919, #131212, #2db8fd);
-  background-attachment: fixed;
-  color: #000000;
+  background: url('/public/rachael-ren-U94eGGi_1ZY-unsplash.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: #000000; /* Ensures text is readable */
   margin: 0;
   padding: 0;
   text-align: center;
 }
 
+
 header {
-  background: #007bff;
+  background: linear-gradient(135deg, #191919, #313030, #2db8fd);
   color: white;
   padding: 1rem 0;
   text-align: center;
@@ -54,13 +55,15 @@ button {
   cursor: pointer;
   min-width: 150px; /* Prevents resizing */
   max-width: 150px; /* Prevents resizing */
+  transition: all 0.3s ease;
 
 }
+
 
 button:hover {
-  background: #0056b3;
+  background: rgba(0, 86, 179, 0.9);
+  transform: scale(1.05);
 }
-
 
 /* Subnet Calculator Layout */
 .container {
