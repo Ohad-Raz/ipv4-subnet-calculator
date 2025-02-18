@@ -25,9 +25,10 @@
 
 /* Active tab styling */
 .mode-buttons button.active {
-  background: rgba(0, 86, 179, 0.9);
+  background: rgba(0, 86, 179, 0.9) !important;
   transform: scale(1.05);
 }
+
 
 /* Mobile Fix: Ensure buttons don’t overflow */
 @media (max-width: 500px) {
