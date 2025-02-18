@@ -61,9 +61,10 @@ const BinaryConverter = () => {
   };
 
   return (
-    <div>
+    <div className="container">
       <h3>Binary to Decimal & Decimal to Binary (IPv4 Context)</h3>
-      <div>
+
+      <div className="input-group">
         <input
           type="text"
           placeholder="Binary (e.g., 11000000.10101000.00000001.00000001)"
@@ -75,7 +76,8 @@ const BinaryConverter = () => {
           {loading ? 'Converting...' : 'Convert to Decimal'}
         </button>
       </div>
-      <div>
+
+      <div className="input-group">
         <input
           type="text"
           placeholder="Decimal (e.g., 192.168.1.1)"
@@ -87,11 +89,12 @@ const BinaryConverter = () => {
           {loading ? 'Converting...' : 'Convert to Binary'}
         </button>
       </div>
+
       {loading && <p>Loading...</p>}
       {!loading && (
         <>
-          <p>Binary: {binary}</p>
-          <p>Decimal: {decimal}</p>
+          <h4>Binary: {binary}</h4>
+          <h4>Decimal: {decimal}</h4>
         </>
       )}
     </div>
