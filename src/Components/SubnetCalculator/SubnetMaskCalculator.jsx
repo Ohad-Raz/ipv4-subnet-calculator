@@ -68,8 +68,20 @@ const SubnetMaskCalculator = ({ onResultsUpdate }) => {
 
     const networkAddress = calculateNetworkAddress(ip, subnet);
     const broadcastAddress = calculateBroadcastAddress(networkAddress, subnet);
-    const firstIp = calculateFirstUsableIp(networkAddress, subnet);
-    const lastIp = calculateLastUsableIp(broadcastAddress, subnet);
+
+    let firstIp, lastIp;
+    
+    if (subnet === "32") {
+        firstIp = "N/A"; 
+        lastIp = "N/A";
+    } else if (subnet === "31") {
+        firstIp = networkAddress; 
+        lastIp = broadcastAddress;
+    } else {
+        firstIp = calculateFirstUsableIp(networkAddress, subnet);
+        lastIp = calculateLastUsableIp(broadcastAddress, subnet);
+    }
+
     const decimalSubnetMask = prefixToDecimal(subnet);
 
     onResultsUpdate({
