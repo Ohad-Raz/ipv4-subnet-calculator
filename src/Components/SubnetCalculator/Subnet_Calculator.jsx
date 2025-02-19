@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import SubnetMaskCalculator from './SubnetMaskCalculator';
 import DevicesCalculator from './DevicesCalculator';
 import '../../Styles/styles.css';
+import './Subnet_Calculator.css';
+
 
 const Subnet_Calculator = () => {
   const [mode, setMode] = useState('subnet');
@@ -18,13 +20,21 @@ const Subnet_Calculator = () => {
 
       {/* Toggle Between Subnet Mask & Devices */}
       <div className="mode-buttons">
-        <button onClick={() => handleModeSwitch('subnet')} className={mode === 'subnet' ? 'active' : ''}>
-          Subnet Mask
-        </button>
-        <button onClick={() => handleModeSwitch('devices')} className={mode === 'devices' ? 'active' : ''}>
-          Number of Devices
-        </button>
-      </div>
+  <button 
+    onClick={() => handleModeSwitch('subnet')} 
+    className={`tab-button ${mode === 'subnet' ? 'active' : ''}`}
+  >
+    Subnet Mask
+  </button>
+
+  <button 
+    onClick={() => handleModeSwitch('devices')} 
+    className={`tab-button ${mode === 'devices' ? 'active' : ''}`}
+  >
+    Number of Devices
+  </button>
+</div>
+
 
       {/* Render the Correct Component Based on Mode */}
       {mode === 'subnet' ? (

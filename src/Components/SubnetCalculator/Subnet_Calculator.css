@@ -1,0 +1,43 @@
+.mode-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;  /* Ensures buttons don't overflow */
+}
+
+.mode-buttons button {
+  flex: 1;  /* Ensures equal width */
+  max-width: 160px;  /* Prevents them from getting too wide */
+  min-width: 140px;  /* Prevents shrinking */
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background: #007bff;
+  color: white;
+  transition: 0.3s ease;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Active tab styling */
+.mode-buttons button.active {
+  background: rgba(0, 86, 179, 0.9) !important;
+  transform: scale(1.05);
+}
+
+
+/* Mobile Fix: Ensure buttons don’t overflow */
+@media (max-width: 500px) {
+  .mode-buttons {
+    flex-direction: column;  /* Stack buttons on top of each other */
+  }
+
+  .mode-buttons button {
+    width: 90%; /* Ensure full width */
+    max-width: 250px; /* Prevent excessive width */
+  }
+}

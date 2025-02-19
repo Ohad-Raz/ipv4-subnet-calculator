@@ -16,7 +16,7 @@ const DevicesCalculator = ({ onResultsUpdate }) => {
 
   const classLimits = {
     A: 16777214,
-    B: 65534,
+    B: 1048574,
     C: 65534,
   };
 
@@ -75,8 +75,8 @@ const DevicesCalculator = ({ onResultsUpdate }) => {
             IP Class:
             <span className="tooltip"> ⓘ
               <span className="tooltip-text">
-                <strong>Class A:</strong> Up to 16,777,214 devices<br />
-                <strong>Class B:</strong> Up to 65,534 devices<br />
+                <strong>Class A:</strong> Up to 16,777,214 devices(if /8)<br />
+                <strong>Class B:</strong> Up to 1,048,574 devices(if /12)<br />
                 <strong>Class C:</strong> Up to 65,534 devices (if /16)
               </span>
             </span>

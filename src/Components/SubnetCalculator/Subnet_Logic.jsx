@@ -28,14 +28,16 @@ export const calculateBroadcastAddress = (network, mask) => {
 };
 
 export const calculateFirstUsableIp = (network, mask) => {
-  if (mask === 32) return network;
+  if (mask === 32) return "N/A";  // No usable IPs for /32
+  if (mask === 31) return network; // /31: first usable is the network itself
   const ipBinary = ipToBinary(network);
   const ipDecimal = binaryToDecimal(ipBinary);
   return decimalToIp(ipDecimal + 1);
 };
 
 export const calculateLastUsableIp = (broadcast, mask) => {
-  if (mask === 32) return broadcast;
+  if (mask === 32) return "N/A";  // No usable IPs for /32
+  if (mask === 31) return broadcast; // /31: last usable is the broadcast itself
   const ipBinary = ipToBinary(broadcast);
   const ipDecimal = binaryToDecimal(ipBinary);
   return decimalToIp(ipDecimal - 1);
