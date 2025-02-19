@@ -4,7 +4,7 @@
 /* Global Styles */
 body {
   font-family: 'Poppins', sans-serif;
-  background: url('/public/rachael-ren-U94eGGi_1ZY-unsplash.jpg') no-repeat center center fixed;
+  background: url('/public/whitebg.png') no-repeat center center fixed;
   background-size: cover;
   color: #000000; /* Ensures text is readable */
   margin: 0;
@@ -16,7 +16,7 @@ body {
 header {
   background: linear-gradient(135deg, #797979, #313030, #c5ecff);
   color: white;
-  padding: 1rem 0;
+  padding: 0.05rem 0;
   text-align: center;
 }
 
