@@ -1,8 +1,8 @@
-import React from 'react';
+import React from "react";
 // import './App.css';
-import './Styles/styles.css';
+import "./Styles/styles.css";
 
-import Calculator_Page from './Pages/Calculator_Page';
+import Calculator_Page from "./Pages/Calculator_Page";
 
 function App() {
   return (
@@ -11,7 +11,7 @@ function App() {
         <h1>IPv4 Subnet Calculator</h1>
       </header>
       <main>
-             <Calculator_Page/>
+        <Calculator_Page />
       </main>
     </div>
   );
